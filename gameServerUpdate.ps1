@@ -1,4 +1,4 @@
-﻿# Custom logging function with timestamp
+# Custom logging function with timestamp
 function Log-Message($message) {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     [Console]::WriteLine("$timestamp $message")
@@ -18,6 +18,11 @@ $exeName = "ShooterGameServer" # The name of the EXE file you want to kill (with
 $batchFilePath = ".\gameExecuteUpdate.bat" # Path to the batch file for updates
 $exePath = "C:\Users\user\Documents\steamcmd\steamapps\common\ARK Survival Evolved Dedicated Server\ShooterGame\Binaries\Win64\ShooterGameServer.exe" # Full path to the EXE file to start with arguments
 $restartFlagPath = ".\lastRestartDate.txt" # File to track the last restart date
+
+function IsServerRunning {
+    $serverProcess = Get-Process $exeName -ErrorAction SilentlyContinue
+    return $serverProcess -ne $null
+}
 
 function KillProcess {
     try {
@@ -45,8 +50,9 @@ function RestartServerIfNeeded {
     $lastRestartDate = if (Test-Path $restartFlagPath) { Get-Content $restartFlagPath } else { "1970-01-01" }
 
     if ($currentHour -ge 2 -and $currentHour -lt 3 -and $lastRestartDate -ne $currentTime.ToString("yyyy-MM-dd")) {
-        #KillProcess
-        #StartServer
+        # The actual restart operations are commented out to prevent accidental restarts during testing
+        # KillProcess
+        # StartServer
         $currentTime.ToString("yyyy-MM-dd") | Out-File $restartFlagPath
         Log-Message "Server was intended to restart on $($currentTime.ToString('yyyy-MM-dd')), but auto-restart is disabled."
     }
@@ -75,11 +81,11 @@ function CheckForUpdate {
 
                 if ([int64]$currentTimeUpdated -gt [int64]$lastUpdateTime) {
                     $currentTimeUpdated | Out-File $lastUpdateTimeFile
-                    Log-Message "New update found for AppID $steamAppID. 'timeupdated' value is newer than the last check."
+                                        Log-Message "New update found for AppID $steamAppID. 'timeupdated' value is newer than the last check."
                     $updateFound = $true
                     $success = $true
                 } else {
-                                        Log-Message "Checked successfully but no new update found. 'timeupdated' value has not changed."
+                    Log-Message "Checked successfully but no new update found. 'timeupdated' value has not changed."
                     $success = $true
                 }
             } else {
@@ -95,10 +101,16 @@ function CheckForUpdate {
     if (-not $success) {
         Log-Message "Failed to check for update after $maxAttempts attempts, will try again in the next interval."
     } elseif ($updateFound) {
-        # Proceed with the update only if a new update was actually found
         KillProcess
         RunBatchFile
-        #StartServer
+        # Wait a moment for any update processes to finalize
+        Start-Sleep -Seconds 10
+        if (-not IsServerRunning) {
+            Log-Message "Server is not running after updates. Attempting to start the server..."
+            StartServer
+        } else {
+            Log-Message "Server update process completed, and the server is already running."
+        }
     }
 }
 
@@ -109,6 +121,5 @@ CheckForUpdate
 while ($true) {
     Start-Sleep -Seconds $intervalSeconds
     CheckForUpdate
-    RestartServerIfNeeded # This function checks if the server needs to be restarted but won't restart it automatically because the start section is commented
+    RestartServerIfNeeded # This function checks if the server needs to be restarted and will restart it if necessary.
 }
-
