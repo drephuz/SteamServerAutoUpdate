@@ -11,12 +11,12 @@ Set-Location -Path $scriptPath
 # Customizable Variables
 $intervalSeconds = 3600 # Check interval in seconds
 $steamAppID = "376030" # Steam AppID for ARK: Survival Evolved Dedicated Server
-$steamCmdPath = "C:\Users\sysadm\Documents\steamcmd\steamcmd.exe" # Full path to steamcmd.exe
+$steamCmdPath = "C:\Users\user\Documents\steamcmd\steamcmd.exe" # Full path to steamcmd.exe
 $outputFilePath = ".\steamcmd_output.txt" # Temporary file to store steamcmd output
 $lastUpdateTimeFile = ".\lastUpdateTime.txt" # File to store the last "timeupdated" value
 $exeName = "ShooterGameServer" # The name of the EXE file you want to kill (without '.exe')
-$batchFilePath = "C:\Users\sysadm\Documents\scripts\ark\arkExecuteUpdate.bat" # Path to the batch file for updates
-$exePath = "C:\Users\sysadm\Documents\steamcmd\steamapps\common\ARK Survival Evolved Dedicated Server\ShooterGame\Binaries\Win64\ShooterGameServer.exe" # Full path to the EXE file to start with arguments
+$batchFilePath = ".\gameExecuteUpdate.bat" # Path to the batch file for updates
+$exePath = "C:\Users\user\Documents\steamcmd\steamapps\common\ARK Survival Evolved Dedicated Server\ShooterGame\Binaries\Win64\ShooterGameServer.exe" # Full path to the EXE file to start with arguments
 $restartFlagPath = ".\lastRestartDate.txt" # File to track the last restart date
 
 function KillProcess {
